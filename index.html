@@ -69,7 +69,11 @@
   .goal-pill.hi  { background:#C0DD97;color:#27500A;border-color:#97C459; }
   .goal-pill.med { background:#FAC775;color:#633806;border-color:#EF9F27; }
   .goal-pill.lo  { background:#D3D1C7;color:#444441;border-color:#B4B2A9; }
-  .query-toggle { display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:var(--text3);background:var(--bg2);border:0.5px solid var(--border2);border-radius:6px;padding:4px 10px;margin-top:12px;cursor:pointer;user-select:none; }
+  .app-tag { display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px;background:#E6F1FB;border:0.5px solid #85B7EB;color:#185FA5;margin-left:6px;vertical-align:middle; }
+  @media(prefers-color-scheme:dark){.app-tag{background:#0C447C;border-color:#378ADD;color:#B5D4F4;}}
+  .cohort-card.app-priority { border-left:3px solid #378ADD; }
+  .initiative.app { background:#E6F1FB;border-left-color:#378ADD; }
+  @media(prefers-color-scheme:dark){.initiative.app{background:#0C447C22;border-left-color:#378ADD;}}
   .query-toggle:hover { color:var(--text2); }
   .query-block { display:none;margin-top:8px;position:relative; }
   .query-block.open { display:block; }
@@ -194,10 +198,10 @@ WHERE c.price = 0
         </div>
       </div>
 
-      <div class="cohort-card" onclick="toggle(this)">
+      <div class="cohort-card app-priority" onclick="toggle(this)">
         <span class="chevron">▼</span>
         <div class="card-header"><span class="badge badge-blue">C2b</span>
-          <div><div class="card-title">Attended free — truly never paid <span class="count-pill">11,298 users</span></div>
+          <div><div class="card-title">Attended free — truly never paid <span class="count-pill">11,298 users</span><span class="app-tag">&#128241; App download priority</span></div>
           <div class="card-def">userHasJoined = true on free sessions. No group payment, no 1:1 payment.</div></div>
         </div>
         <div class="card-detail">
@@ -210,6 +214,9 @@ WHERE c.price = 0
           <div class="initiative"><div class="init-title">Attendance-based personalisation</div><div class="init-desc">You know which sessions they actually joined. "You attended 3 sessions with [Practitioner] — here's the next step in that journey."</div></div>
           <div class="initiative"><div class="init-title">Progress framing</div><div class="init-desc">Frame their free attendance as "stage 1 complete." Make paid feel like progression, not a new commitment.</div></div>
           <div class="initiative"><div class="init-title">Practitioner-sent continuation message</div><div class="init-desc">"I've seen you in [N] sessions — I think you're ready for the next level." Feels earned, not generic.</div></div>
+          <div class="section-label">&#128241; App download initiatives</div>
+          <div class="initiative app"><div class="init-title">Practitioner-anchored app download WhatsApp</div><div class="init-desc">Pull the last practitioner each user attended. Send: "[Name], [Practitioner Name] just opened new sessions on SoulSensei. The fastest way to book is on the app — you'll also get notified the moment new slots go live. [App Store link] [Play Store link]." The practitioner name is the hook — makes it feel like a personal heads-up, not a marketing blast. Requires a JOIN between CourseUsers and the Leader/Practitioner table to get the last practitioner per user.</div></div>
+          <div class="initiative app"><div class="init-title">App as the booking shortcut</div><div class="init-desc">Never pitch the app as the destination — pitch it as the easiest way to get to the session. "Book [Practitioner]'s next session in one tap on the app." The session is the reason, the app is just the path. Reduces perceived friction of a download ask.</div></div>
           <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
           <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C2b: Attended free, never paid (group or 1:1)
 WITH free_attended AS (
@@ -291,10 +298,10 @@ WHERE ao."userId" NOT IN (SELECT "userId" FROM paid_group)
     <div class="stage-block">
       <div class="stage-label">Stage 3 — Paid group only (no 1:1)</div>
 
-      <div class="cohort-card" onclick="toggle(this)">
+      <div class="cohort-card app-priority" onclick="toggle(this)">
         <span class="chevron">▼</span>
         <div class="card-header"><span class="badge badge-teal">C3</span>
-          <div><div class="card-title">Paid group once — never returned <span class="count-pill">11,578 users</span></div>
+          <div><div class="card-title">Paid group once — never returned <span class="count-pill">11,578 users</span><span class="app-tag">&#128241; App download priority</span></div>
           <div class="card-def">Exactly 1 group payment, last session 14+ days ago, no 1:1 payment</div></div>
         </div>
         <div class="card-detail">
@@ -307,6 +314,9 @@ WHERE ao."userId" NOT IN (SELECT "userId" FROM paid_group)
           <div class="initiative"><div class="init-title">Calendar hook</div><div class="init-desc">Seasonal and cultural moments — new month, Navratri, Diwali, new year. "A new month is a good time to restart your practice."</div></div>
           <div class="initiative"><div class="init-title">Continuity message</div><div class="init-desc">Frame first session as step 1 of something unfinished: "You started something in [month] — here's where most people go next."</div></div>
           <div class="initiative"><div class="init-title">Practitioner check-in</div><div class="init-desc">"How have you been since our last session? The next one is coming up." Short, warm, no booking link in the first message.</div></div>
+          <div class="section-label">&#128241; App download initiatives</div>
+          <div class="initiative app"><div class="init-title">Re-engagement WhatsApp with practitioner + app link</div><div class="init-desc">Identify the practitioner from their one paid session. Send: "[Name], [Practitioner Name] has new sessions opening up — the easiest way to book and get notified is on the app. [App Store link] [Play Store link]." They've already paid once, so the practitioner name carries real weight here. Combine re-engagement and app download in one message — don't send two separate asks.</div></div>
+          <div class="initiative app"><div class="init-title">App notification as the "never miss again" pitch</div><div class="init-desc">These users paid once and drifted — often because they forgot or missed the next session. Frame the app around solving that exact problem: "Get notified the moment [Practitioner] opens new slots — so you never miss another one." Addresses the root cause of churn (forgetting) with a practical solution (push notifications).</div></div>
           <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
           <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C3: Paid group only, exactly once, never returned (14+ days)
 WITH group_payments AS (
@@ -511,10 +521,10 @@ WHERE last_any_session >= NOW() - INTERVAL '60 days';</pre></div>
     <div class="stage-block">
       <div class="stage-label">Stage 6 — Lapsing and churned (any payment type)</div>
 
-      <div class="cohort-card" onclick="toggle(this)">
+      <div class="cohort-card app-priority" onclick="toggle(this)">
         <span class="chevron">▼</span>
         <div class="card-header"><span class="badge badge-amber">C6</span>
-          <div><div class="card-title">Going cold — at risk <span class="count-pill">2,046 users</span></div>
+          <div><div class="card-title">Going cold — at risk <span class="count-pill">2,046 users</span><span class="app-tag">&#128241; App download priority</span></div>
           <div class="card-def">Last paid session (group or 1:1) was 30–60 days ago</div></div>
         </div>
         <div class="card-detail">
@@ -527,6 +537,9 @@ WHERE last_any_session >= NOW() - INTERVAL '60 days';</pre></div>
           <div class="initiative"><div class="init-title">Practitioner-sent personal message</div><div class="init-desc">"I noticed you haven't been around — is everything okay?" No booking link in the first message. Reply rate dramatically higher than any broadcast.</div></div>
           <div class="initiative"><div class="init-title">Specific session, not a general invite</div><div class="init-desc">"There's a session on [specific topic] this [day] at [time] — I think you'd connect with it." Specificity makes it feel considered, not bulk.</div></div>
           <div class="initiative"><div class="init-title">Change the channel — voice note</div><div class="init-desc">A 20–30 second WhatsApp voice note from the practitioner. Warmth of voice cuts through when text has failed.</div></div>
+          <div class="section-label">&#128241; App download initiatives</div>
+          <div class="initiative app"><div class="init-title">App as a "something new" re-entry hook</div><div class="init-desc">Use a real new launch — practitioner, feature, or session format — as the reason to reach out, with the app as the delivery mechanism. "[Name], we've added [Practitioner Name] to SoulSensei since you were last here — their sessions are getting great responses. Easiest way to check it out and book is on the app: [link]." The new thing is the hook; the app is how they access it. Never lead with "download our app."</div></div>
+          <div class="initiative app"><div class="init-title">Notification opt-in as the ask (not a download ask)</div><div class="init-desc">Reframe the download as "never miss a session again" — specifically for a practitioner they've paid for before. "Want to get notified the moment [Practitioner] opens new sessions? Download the app and turn on notifications — takes 2 minutes." Solves a real problem they've experienced (missing sessions) rather than asking for a generic app install.</div></div>
           <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
           <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C6: Last paid session (group or 1:1) 30–60 days ago
 WITH group_payments AS (
@@ -652,10 +665,10 @@ WHERE cu.status = 'ACTIVE'
     <div class="stage-block">
       <div class="stage-label">Stage 8 — Offline users</div>
 
-      <div class="cohort-card" onclick="toggle(this)">
+      <div class="cohort-card app-priority" onclick="toggle(this)">
         <span class="chevron">▼</span>
         <div class="card-header"><span class="badge badge-purple">C8</span>
-          <div><div class="card-title">Offline only — never paid online <span class="count-pill">1,005 users</span></div>
+          <div><div class="card-title">Offline only — never paid online <span class="count-pill">1,005 users</span><span class="app-tag">&#128241; App download priority</span></div>
           <div class="card-def">Attended offline sessions, no paid online group session, no 1:1 payment</div></div>
         </div>
         <div class="card-detail">
@@ -668,6 +681,9 @@ WHERE cu.status = 'ACTIVE'
           <div class="initiative"><div class="init-title">In-room announcement at offline session</div><div class="init-desc">"For those who want to continue between our in-person meetups, we also run online sessions — same energy, flexible timing."</div></div>
           <div class="initiative"><div class="init-title">"Between sessions" positioning</div><div class="init-desc">"The next in-person is in 3 weeks — there's an online session this Thursday to keep the practice going."</div></div>
           <div class="initiative"><div class="init-title">Same practitioner bridge — always</div><div class="init-desc">First online session must be with the same practitioner they met in person. Trust transfers. A new face makes it feel like a different platform.</div></div>
+          <div class="section-label">&#128241; App download initiatives</div>
+          <div class="initiative app"><div class="init-title">Post-offline-session automated WhatsApp with app link</div><div class="init-desc">Trigger automatically within 2 hours of every offline session ending. Message: "[Name], great to see you today at [Session Name] with [Practitioner]. Want to keep the practice going? [Practitioner] runs online sessions too — book directly on the app: [App Store link] [Play Store link]. Same work, from wherever you are." This is the highest-trust moment in the entire user journey — energy is high, practitioner name is warm and fresh. Wire to ci."startDate" + session duration as the trigger.</div></div>
+          <div class="initiative app"><div class="init-title">App as the offline companion, not a replacement</div><div class="init-desc">Position the app explicitly as something that makes their offline experience better — not something that replaces it. "See upcoming sessions, get reminders before in-person meetups, and book online sessions in between — all in one place." Never mention "virtual" or "online" in the download ask — frame it as a companion to their existing offline habit.</div></div>
           <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
           <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C8: Offline only, never paid online (group or 1:1)
 SELECT DISTINCT cu."userId"
