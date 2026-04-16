@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SoulSensei — Full Cohort Framework</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f4f0; --bg3: #f0efe9;
+    --text: #1a1a18; --text2: #5a5a55; --text3: #8a8a84;
+    --border: rgba(0,0,0,0.10); --border2: rgba(0,0,0,0.18);
+    --radius: 12px; --radius-sm: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#1c1c1a;--bg2:#252523;--bg3:#2e2e2b;--text:#e8e6de;--text2:#a0a09a;--text3:#666662;--border:rgba(255,255,255,0.10);--border2:rgba(255,255,255,0.18); }
+    .badge-gray   { background:#444441!important;color:#D3D1C7!important; }
+    .badge-blue   { background:#0C447C!important;color:#B5D4F4!important; }
+    .badge-teal   { background:#085041!important;color:#9FE1CB!important; }
+    .badge-amber  { background:#633806!important;color:#FAC775!important; }
+    .badge-purple { background:#3C3489!important;color:#CECBF6!important; }
+    .badge-coral  { background:#712B13!important;color:#F5C4B3!important; }
+    .badge-green  { background:#27500A!important;color:#C0DD97!important; }
+    .goal-pill.hi  { background:#27500A!important;color:#C0DD97!important;border-color:#3B6D11!important; }
+    .goal-pill.med { background:#633806!important;color:#FAC775!important;border-color:#854F0B!important; }
+    .goal-pill.lo  { background:#444441!important;color:#D3D1C7!important;border-color:#5F5E5A!important; }
+  }
+  body { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:var(--bg3);color:var(--text);padding:32px 16px;min-height:100vh; }
+  .page { max-width:780px;margin:0 auto; }
+  h1 { font-size:20px;font-weight:500;color:var(--text);margin-bottom:4px; }
+  .subtitle { font-size:13px;color:var(--text3);margin-bottom:24px; }
+  .tab-bar { display:flex;gap:4px;margin-bottom:24px;border-bottom:1px solid var(--border2);padding-bottom:0; }
+  .tab-btn { font-size:13px;font-weight:500;color:var(--text3);background:none;border:none;padding:8px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color 0.15s,border-color 0.15s; }
+  .tab-btn:hover { color:var(--text2); }
+  .tab-btn.active { color:var(--text);border-bottom-color:var(--text); }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+  .stage-block { margin-bottom:28px; }
+  .stage-label { font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.07em;color:var(--text3);margin:0 0 8px 4px; }
+  .cohort-card { background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:border-color 0.15s,background 0.15s;position:relative; }
+  .cohort-card:hover,.cohort-card.active { border-color:var(--border2);background:var(--bg2); }
+  .card-header { display:flex;align-items:flex-start;gap:12px; }
+  .badge { font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0;margin-top:2px; }
+  .badge-gray   { background:#D3D1C7;color:#444441; }
+  .badge-blue   { background:#B5D4F4;color:#0C447C; }
+  .badge-teal   { background:#9FE1CB;color:#085041; }
+  .badge-amber  { background:#FAC775;color:#633806; }
+  .badge-purple { background:#CECBF6;color:#3C3489; }
+  .badge-coral  { background:#F5C4B3;color:#712B13; }
+  .badge-green  { background:#C0DD97;color:#27500A; }
+  .card-title { font-size:14px;font-weight:500;color:var(--text);line-height:1.4; }
+  .card-def { font-size:12px;color:var(--text2);margin-top:2px; }
+  .count-pill { display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;margin-left:6px;background:var(--bg2);border:0.5px solid var(--border2);color:var(--text2);vertical-align:middle; }
+  .chevron { position:absolute;right:16px;top:16px;color:var(--text3);font-size:12px;transition:transform 0.15s; }
+  .chevron.open { transform:rotate(180deg); }
+  .card-detail { margin-top:12px;display:none;border-top:0.5px solid var(--border);padding-top:12px; }
+  .card-detail.open { display:block; }
+  .two-col { display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px; }
+  @media(max-width:520px){.two-col{grid-template-columns:1fr;}}
+  .dbox { background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px; }
+  .dbox-label { font-size:11px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px; }
+  .dbox-content { font-size:12px;color:var(--text);line-height:1.65; }
+  .section-label { font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;color:var(--text3);margin:12px 0 6px 2px; }
+  .initiative { background:var(--bg2);border-left:2px solid var(--border2);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:8px 12px;margin-bottom:7px; }
+  .init-title { font-size:12px;font-weight:500;color:var(--text);margin-bottom:3px; }
+  .init-desc { font-size:12px;color:var(--text2);line-height:1.6; }
+  .goal-row { display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap; }
+  .goal-pill { font-size:11px;padding:3px 10px;border-radius:99px;border:0.5px solid var(--border2);color:var(--text2);background:var(--bg); }
+  .goal-pill.hi  { background:#C0DD97;color:#27500A;border-color:#97C459; }
+  .goal-pill.med { background:#FAC775;color:#633806;border-color:#EF9F27; }
+  .goal-pill.lo  { background:#D3D1C7;color:#444441;border-color:#B4B2A9; }
+  .query-toggle { display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:var(--text3);background:var(--bg2);border:0.5px solid var(--border2);border-radius:6px;padding:4px 10px;margin-top:12px;cursor:pointer;user-select:none; }
+  .query-toggle:hover { color:var(--text2); }
+  .query-block { display:none;margin-top:8px;position:relative; }
+  .query-block.open { display:block; }
+  .copy-btn { position:absolute;top:8px;right:8px;font-size:11px;font-weight:500;color:var(--text3);background:var(--bg2);border:0.5px solid var(--border2);border-radius:5px;padding:3px 9px;cursor:pointer;user-select:none;transition:all 0.15s;z-index:1; }
+  .copy-btn:hover { color:var(--text); }
+  .copy-btn.copied { color:#27500A;border-color:#97C459;background:#EAF3DE; }
+  pre { background:var(--bg3);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;padding-right:70px;font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:11px;line-height:1.6;color:var(--text2);overflow-x:auto;white-space:pre; }
+  .chart-wrap { margin-bottom:8px; }
+  .chart-row { display:grid;grid-template-columns:280px 1fr;gap:16px;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border); }
+  .chart-row:last-child { border-bottom:none; }
+  .chart-meta { display:flex;align-items:flex-start;gap:10px; }
+  .chart-badge { font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap;flex-shrink:0;margin-top:2px; }
+  .chart-name { font-size:13px;font-weight:500;color:var(--text);line-height:1.3; }
+  .chart-def { font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4; }
+  .chart-bar-wrap { display:flex;align-items:center;gap:10px; }
+  .chart-bar { height:20px;border-radius:4px;flex-shrink:0; }
+  .chart-stat { font-size:12px;white-space:nowrap;flex-shrink:0; }
+  .chart-axis { display:flex;justify-content:space-between;padding:6px 0 20px 280px;font-size:10px;color:var(--text3);border-top:0.5px solid var(--border);margin-top:4px; }
+  .chart-group-label { font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text3);margin:20px 0 4px 0;padding-bottom:4px;border-bottom:0.5px solid var(--border); }
+  .callout-row { display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:20px; }
+  .callout { border:0.5px solid;border-radius:var(--radius-sm);padding:14px 16px; }
+  .callout-title { font-size:12px;font-weight:500;margin-bottom:4px; }
+  .callout-val { font-size:16px;font-weight:500;margin-bottom:4px; }
+  .callout-desc { font-size:11px;color:var(--text2);line-height:1.5; }
+  @media(max-width:600px){.chart-row{grid-template-columns:1fr;}.chart-axis{padding-left:0;}.callout-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>SoulSensei — Full Cohort Framework</h1>
+  <p class="subtitle">14 cohorts across 8 lifecycle stages &middot; Group + personal sessions &middot; Total user base: 54,036</p>
+
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('cohorts')">Cohort detail</button>
+    <button class="tab-btn" onclick="switchTab('chart')">Size vs user base</button>
+  </div>
+
+  <!-- ═══════ COHORT DETAIL TAB ═══════ -->
+  <div class="tab-panel active" id="tab-cohorts">
+
+    <!-- STAGE 1 -->
+    <div class="stage-block">
+      <div class="stage-label">Stage 1 — Dormant signups</div>
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-gray">C1</span>
+          <div><div class="card-title">Signed up — done nothing <span class="count-pill">9,287 users</span></div>
+          <div class="card-def">Registered but no free registration, no group payment, no 1:1 payment</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: first session attendance</span><span class="goal-pill med">Revenue potential: low short-term, high volume</span></div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">5-day free session journey</div><div class="init-desc">A structured sequence that lowers the barrier to attending the first session completely.</div></div>
+          <div class="initiative"><div class="init-title">60-second platform intro</div><div class="init-desc">Single message explaining what SoulSensei is in plain language. New signups often don't have full context on what they signed up for.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C1: Signed up, done nothing
+SELECT DISTINCT up."userId"
+FROM "UserProfile" up
+WHERE NOT EXISTS (
+  SELECT 1 FROM "CourseUsers" cu
+  WHERE cu."userId" = up."userId"
+    AND cu.status = 'ACTIVE'
+)
+AND NOT EXISTS (
+  SELECT 1 FROM "LeaderUserQuery" luq
+  WHERE luq."userId" = up."userId"
+    AND luq.status = 'ACTIVE'
+);</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 2 -->
+    <div class="stage-block">
+      <div class="stage-label">Stage 2 — Free users (never paid anything)</div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-blue">C2</span>
+          <div><div class="card-title">Registered free — never attended, never paid <span class="count-pill">11,164 users</span></div>
+          <div class="card-def">Enrolled in free session(s) but userHasJoined = false on all. No group or 1:1 payment.</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: first actual attendance</span><span class="goal-pill med">Revenue potential: low — need to build intent first</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Who they are</div><div class="dbox-content">Signed up with some curiosity but never showed up. Could be timing, wrong topic, or they forgot. Treat as cold leads — not warm ones.</div></div>
+            <div class="dbox"><div class="dbox-label">Principle</div><div class="dbox-content">Don't pitch paid. Re-earn their attention with a low-friction, high-curiosity hook.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">Reframe around convenience</div><div class="init-desc">Most no-shows are timing issues, not disinterest. "Couldn't make it? Here's the next one — pick a time that works."</div></div>
+          <div class="initiative"><div class="init-title">Try a completely different format</div><div class="init-desc">The original session may not have been the right hook. Offer something shorter, different topic, or a different practitioner.</div></div>
+          <div class="initiative"><div class="init-title">Social proof nudge</div><div class="init-desc">"X people attended last week's session — here's what they said." A concrete outcome statement lowers the perceived risk of showing up.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C2: Registered free, never attended, never paid
+SELECT DISTINCT cu."userId"
+FROM "CourseUsers" cu
+JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+JOIN "Course" c ON c.id = ci."courseId"
+WHERE c.price = 0
+  AND cu.status = 'ACTIVE'
+  AND cu."userHasJoined" = false
+  AND NOT EXISTS (
+    SELECT 1 FROM "CourseUsers" cu2
+    JOIN "CourseInstance" ci2 ON cu2."courseInstanceId" = ci2.id
+    JOIN "Course" c2 ON c2.id = ci2."courseId"
+    WHERE cu2."userId" = cu."userId"
+      AND cu2."userHasJoined" = true
+      AND c2.price = 0
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM "CourseUsers" cu3
+    JOIN "CourseInstance" ci3 ON cu3."courseInstanceId" = ci3.id
+    JOIN "Course" c3 ON c3.id = ci3."courseId"
+    WHERE cu3."userId" = cu."userId"
+      AND cu3.status = 'ACTIVE' AND c3.price > 0
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM "LeaderUserQuery" luq
+    WHERE luq."userId" = cu."userId"
+      AND luq.status = 'ACTIVE'
+  );</pre></div>
+        </div>
+      </div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-blue">C2b</span>
+          <div><div class="card-title">Attended free — truly never paid <span class="count-pill">11,298 users</span></div>
+          <div class="card-def">userHasJoined = true on free sessions. No group payment, no 1:1 payment.</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: first paid transaction</span><span class="goal-pill hi">Revenue potential: high — proven they show up</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Why this matters</div><div class="dbox-content">Unlike C2, these users have proven they show up. Much higher conversion likelihood. The gap is the payment step, not the engagement step.</div></div>
+            <div class="dbox"><div class="dbox-label">Principle</div><div class="dbox-content">Focus the message on what they're missing by not continuing — not on the price.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">Attendance-based personalisation</div><div class="init-desc">You know which sessions they actually joined. "You attended 3 sessions with [Practitioner] — here's the next step in that journey."</div></div>
+          <div class="initiative"><div class="init-title">Progress framing</div><div class="init-desc">Frame their free attendance as "stage 1 complete." Make paid feel like progression, not a new commitment.</div></div>
+          <div class="initiative"><div class="init-title">Practitioner-sent continuation message</div><div class="init-desc">"I've seen you in [N] sessions — I think you're ready for the next level." Feels earned, not generic.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C2b: Attended free, never paid (group or 1:1)
+WITH free_attended AS (
+  SELECT DISTINCT cu."userId"
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price = 0
+    AND cu.status = 'ACTIVE'
+    AND cu."userHasJoined" = true
+),
+paid_group AS (
+  SELECT DISTINCT cu."userId"
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price > 0 AND cu.status = 'ACTIVE'
+),
+paid_1on1 AS (
+  SELECT DISTINCT "userId"
+  FROM "LeaderUserQuery" WHERE status = 'ACTIVE'
+)
+SELECT fa."userId"
+FROM free_attended fa
+WHERE fa."userId" NOT IN (SELECT "userId" FROM paid_group)
+  AND fa."userId" NOT IN (SELECT "userId" FROM paid_1on1);</pre></div>
+        </div>
+      </div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-blue">C2c</span>
+          <div><div class="card-title">Attended once free, dropped off — never paid <span class="count-pill">8,224 users</span></div>
+          <div class="card-def">userHasJoined = true on exactly 1 free session, silent 14+ days, no group or 1:1 payment</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: second attendance</span><span class="goal-pill lo">Revenue potential: low direct — get them back first</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Key distinction from C2</div><div class="dbox-content">C2 never showed up. C2c confirmed they attended once — they know what the experience is. Much warmer.</div></div>
+            <div class="dbox"><div class="dbox-label">Approach</div><div class="dbox-content">Re-entry hook should reference what they felt, not what they missed. Nostalgia beats curiosity for this group.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">Reference the experience</div><div class="init-desc">"Remember how you felt after your session on [date]? That feeling is available again." Anchor to the memory.</div></div>
+          <div class="initiative"><div class="init-title">Low-friction second session</div><div class="init-desc">"One more session, same format, different topic." Make it feel as easy as the first time.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C2c: Attended exactly 1 free, silent 14+ days, never paid
+WITH attended_once AS (
+  SELECT cu."userId", MAX(ci."startDate") AS last_free_session
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price = 0
+    AND cu.status = 'ACTIVE'
+    AND cu."userHasJoined" = true
+  GROUP BY cu."userId"
+  HAVING COUNT(DISTINCT cu."courseInstanceId") = 1
+),
+paid_group AS (
+  SELECT DISTINCT cu."userId"
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price > 0 AND cu.status = 'ACTIVE'
+),
+paid_1on1 AS (
+  SELECT DISTINCT "userId"
+  FROM "LeaderUserQuery" WHERE status = 'ACTIVE'
+)
+SELECT ao."userId"
+FROM attended_once ao
+WHERE ao."userId" NOT IN (SELECT "userId" FROM paid_group)
+  AND ao."userId" NOT IN (SELECT "userId" FROM paid_1on1)
+  AND ao.last_free_session &lt;= NOW() - INTERVAL '14 days';</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 3 -->
+    <div class="stage-block">
+      <div class="stage-label">Stage 3 — Paid group only (no 1:1)</div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-teal">C3</span>
+          <div><div class="card-title">Paid group once — never returned <span class="count-pill">11,578 users</span></div>
+          <div class="card-def">Exactly 1 group payment, last session 14+ days ago, no 1:1 payment</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: second group payment or first 1:1</span><span class="goal-pill hi">Revenue potential: high — payment barrier already broken</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Root cause</div><div class="dbox-content">Not dissatisfaction — friction of daily life. Habit wasn't formed after one session.</div></div>
+            <div class="dbox"><div class="dbox-label">Principle</div><div class="dbox-content">No discounting. Create a reason tied to timing, momentum, or something new.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">Calendar hook</div><div class="init-desc">Seasonal and cultural moments — new month, Navratri, Diwali, new year. "A new month is a good time to restart your practice."</div></div>
+          <div class="initiative"><div class="init-title">Continuity message</div><div class="init-desc">Frame first session as step 1 of something unfinished: "You started something in [month] — here's where most people go next."</div></div>
+          <div class="initiative"><div class="init-title">Practitioner check-in</div><div class="init-desc">"How have you been since our last session? The next one is coming up." Short, warm, no booking link in the first message.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C3: Paid group only, exactly once, never returned (14+ days)
+WITH group_payments AS (
+  SELECT cu."userId",
+         COUNT(DISTINCT cu."courseInstanceId") AS group_count,
+         MAX(ci."startDate") AS last_group_session
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price > 0 AND cu.status = 'ACTIVE'
+  GROUP BY cu."userId"
+  HAVING COUNT(DISTINCT cu."courseInstanceId") = 1
+),
+paid_1on1 AS (
+  SELECT DISTINCT "userId"
+  FROM "LeaderUserQuery" WHERE status = 'ACTIVE'
+)
+SELECT gp."userId"
+FROM group_payments gp
+WHERE gp."userId" NOT IN (SELECT "userId" FROM paid_1on1)
+  AND gp.last_group_session &lt;= NOW() - INTERVAL '14 days';</pre></div>
+        </div>
+      </div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-teal">C3b</span>
+          <div><div class="card-title">Repeat paid group — active, no 1:1 <span class="count-pill">2,150 users</span></div>
+          <div class="card-def">2+ group payments, last session within 60 days, no 1:1 payment</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: retention + first 1:1 upsell</span><span class="goal-pill hi">Revenue potential: very high — best group-to-1:1 conversion target</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Who they are</div><div class="dbox-content">Your most loyal group-only users. They've paid repeatedly and are still active — the highest trust, lowest barrier to a 1:1 introduction.</div></div>
+            <div class="dbox"><div class="dbox-label">Principle</div><div class="dbox-content">Retain first, upsell second. Early access and status keep them loyal. The 1:1 ask comes from the practitioner, not the platform.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">Early access to new sessions</div><div class="init-desc">24–48 hrs priority booking before public announcement. No price benefit — just status.</div></div>
+          <div class="initiative"><div class="init-title">Milestone recognition</div><div class="init-desc">"You've attended 5 sessions — that's more than 90% of our users." Recognition that makes them less likely to break the pattern.</div></div>
+          <div class="initiative"><div class="init-title">Practitioner 1:1 invitation</div><div class="init-desc">After 3+ group sessions: "I'd love to work with you one-on-one — I think there's a lot more we could explore together." The highest conversion moment for 1:1 upsell.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C3b: Paid group 2+ times, active (within 60 days), no 1:1
+WITH group_payments AS (
+  SELECT cu."userId",
+         COUNT(DISTINCT cu."courseInstanceId") AS group_count,
+         MAX(ci."startDate") AS last_group_session
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price > 0 AND cu.status = 'ACTIVE'
+  GROUP BY cu."userId"
+  HAVING COUNT(DISTINCT cu."courseInstanceId") >= 2
+),
+paid_1on1 AS (
+  SELECT DISTINCT "userId"
+  FROM "LeaderUserQuery" WHERE status = 'ACTIVE'
+)
+SELECT gp."userId"
+FROM group_payments gp
+WHERE gp."userId" NOT IN (SELECT "userId" FROM paid_1on1)
+  AND gp.last_group_session >= NOW() - INTERVAL '60 days';</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 4 -->
+    <div class="stage-block">
+      <div class="stage-label">Stage 4 — Paid 1:1 only (no group)</div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-coral">C4</span>
+          <div><div class="card-title">Paid 1:1 once — never returned <span class="count-pill">875 users</span></div>
+          <div class="card-def">Exactly 1 completed 1:1 session, last session 14+ days ago, no group payment</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: second 1:1 or first group session</span><span class="goal-pill hi">Revenue potential: high — personal connection already established</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Who they are</div><div class="dbox-content">Came in through the personal route. Prefer intimacy. Paid once and drifted — but the practitioner relationship is the strongest asset here.</div></div>
+            <div class="dbox"><div class="dbox-label">Approach</div><div class="dbox-content">Practitioner-led re-engagement only. The platform messaging will feel cold for this group — they came for a person, not a product.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">Practitioner personal follow-up</div><div class="init-desc">"Checking in — how have things been since our session? I have some availability coming up." Personal, warm, no pressure. Re-opens the conversation.</div></div>
+          <div class="initiative"><div class="init-title">Progress nudge</div><div class="init-desc">"Most people see the biggest shift after 3 sessions — you've done 1, which is a great start." Frames continuation as the natural path, not a new decision.</div></div>
+          <div class="initiative"><div class="init-title">Group as complement</div><div class="init-desc">"Between 1:1 sessions, here's a group session that might complement what we worked on." Introduces group without replacing the 1:1 relationship.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C4: Paid 1:1 only, exactly once, never returned (14+ days)
+WITH one_on_one AS (
+  SELECT "userId",
+         COUNT(*) AS session_count,
+         MAX("sessionDate") AS last_session
+  FROM "LeaderUserQuery"
+  WHERE status = 'ACTIVE'
+  GROUP BY "userId"
+  HAVING COUNT(*) = 1
+),
+paid_group AS (
+  SELECT DISTINCT cu."userId"
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price > 0 AND cu.status = 'ACTIVE'
+)
+SELECT o."userId"
+FROM one_on_one o
+WHERE o."userId" NOT IN (SELECT "userId" FROM paid_group)
+  AND o.last_session &lt;= NOW() - INTERVAL '14 days';</pre></div>
+        </div>
+      </div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-coral">C4b</span>
+          <div><div class="card-title">Repeat 1:1 — active, no group <span class="count-pill">101 users</span></div>
+          <div class="card-def">2+ completed 1:1 sessions, last session within 60 days, no group payment</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: retention + group introduction</span><span class="goal-pill hi">Revenue potential: very high — deep practitioner trust established</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Who they are</div><div class="dbox-content">Small but highly committed cohort. They've chosen the personal route consistently. Protecting this relationship is the priority.</div></div>
+            <div class="dbox"><div class="dbox-label">Approach</div><div class="dbox-content">Don't disrupt the 1:1 relationship. Introduce group as a complement — never as a cheaper alternative. Practitioner continuity is critical.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">VIP treatment</div><div class="init-desc">First access to new practitioners, special sessions, exclusive formats. They're investing significantly — they should feel it.</div></div>
+          <div class="initiative"><div class="init-title">Practitioner-recommended group session</div><div class="init-desc">"I think this group session would complement what we've been working on together." Trust is established — the recommendation lands with authority.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C4b: Paid 1:1 only, 2+ times, active (within 60 days), no group
+WITH one_on_one AS (
+  SELECT "userId",
+         COUNT(*) AS session_count,
+         MAX("sessionDate") AS last_session
+  FROM "LeaderUserQuery"
+  WHERE status = 'ACTIVE'
+  GROUP BY "userId"
+  HAVING COUNT(*) >= 2
+),
+paid_group AS (
+  SELECT DISTINCT cu."userId"
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price > 0 AND cu.status = 'ACTIVE'
+)
+SELECT o."userId"
+FROM one_on_one o
+WHERE o."userId" NOT IN (SELECT "userId" FROM paid_group)
+  AND o.last_session >= NOW() - INTERVAL '60 days';</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 5 -->
+    <div class="stage-block">
+      <div class="stage-label">Stage 5 — Paid both group + 1:1 (active)</div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-green">C5</span>
+          <div><div class="card-title">Paid both group + 1:1 — active <span class="count-pill">404 users</span></div>
+          <div class="card-def">Has both group payments and 1:1 sessions, last session (either) within 60 days</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: retention + referral</span><span class="goal-pill hi">Revenue potential: highest LTV on the platform</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Who they are</div><div class="dbox-content">Fully committed to both formats. Have invested significantly — financially and emotionally. Losing one of these users is very costly.</div></div>
+            <div class="dbox"><div class="dbox-label">Approach</div><div class="dbox-content">Protect above all others. Give status, recognition, and a role. Best referral source on the platform.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">First access to everything</div><div class="init-desc">New practitioners, special formats, exclusive sessions. They should always feel they're inside something others aren't.</div></div>
+          <div class="initiative"><div class="init-title">Referral mechanic built for this cohort</div><div class="init-desc">"Bring a friend to a session." No discounting — the ask is about sharing something they love. Most credible advocates on the platform.</div></div>
+          <div class="initiative"><div class="init-title">Progress and milestone recognition</div><div class="init-desc">"You've done X group sessions and Y personal sessions — that's a real commitment." Makes them feel seen, not just transacted.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C5: Paid both group + 1:1, last session within 60 days
+WITH group_payments AS (
+  SELECT cu."userId", MAX(ci."startDate") AS last_group
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price > 0 AND cu.status = 'ACTIVE'
+  GROUP BY cu."userId"
+),
+one_on_one AS (
+  SELECT "userId", MAX("sessionDate") AS last_1on1
+  FROM "LeaderUserQuery"
+  WHERE status = 'ACTIVE'
+  GROUP BY "userId"
+),
+combined AS (
+  SELECT gp."userId",
+         GREATEST(gp.last_group, o.last_1on1) AS last_any_session
+  FROM group_payments gp
+  JOIN one_on_one o ON gp."userId" = o."userId"
+)
+SELECT "userId"
+FROM combined
+WHERE last_any_session >= NOW() - INTERVAL '60 days';</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 6 -->
+    <div class="stage-block">
+      <div class="stage-label">Stage 6 — Lapsing and churned (any payment type)</div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-amber">C6</span>
+          <div><div class="card-title">Going cold — at risk <span class="count-pill">2,046 users</span></div>
+          <div class="card-def">Last paid session (group or 1:1) was 30–60 days ago</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: re-engage before full churn</span><span class="goal-pill med">Revenue potential: medium — near-zero re-acquisition cost</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Why generic doesn't work</div><div class="dbox-content">They've seen broadcast messages and not responded. Next move must feel different — more specific, more human.</div></div>
+            <div class="dbox"><div class="dbox-label">Shift in approach</div><div class="dbox-content">Stop broadcasting. Start targeting. Message, timing, and sender all need to change.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">Practitioner-sent personal message</div><div class="init-desc">"I noticed you haven't been around — is everything okay?" No booking link in the first message. Reply rate dramatically higher than any broadcast.</div></div>
+          <div class="initiative"><div class="init-title">Specific session, not a general invite</div><div class="init-desc">"There's a session on [specific topic] this [day] at [time] — I think you'd connect with it." Specificity makes it feel considered, not bulk.</div></div>
+          <div class="initiative"><div class="init-title">Change the channel — voice note</div><div class="init-desc">A 20–30 second WhatsApp voice note from the practitioner. Warmth of voice cuts through when text has failed.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C6: Last paid session (group or 1:1) 30–60 days ago
+WITH group_payments AS (
+  SELECT cu."userId", MAX(ci."startDate") AS last_group
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price > 0 AND cu.status = 'ACTIVE'
+  GROUP BY cu."userId"
+),
+one_on_one AS (
+  SELECT "userId", MAX("sessionDate") AS last_1on1
+  FROM "LeaderUserQuery"
+  WHERE status = 'ACTIVE'
+  GROUP BY "userId"
+),
+combined AS (
+  SELECT COALESCE(gp."userId", o."userId") AS "userId",
+         GREATEST(
+           COALESCE(gp.last_group, '1970-01-01'),
+           COALESCE(o.last_1on1,   '1970-01-01')
+         ) AS last_any_session
+  FROM group_payments gp
+  FULL OUTER JOIN one_on_one o ON gp."userId" = o."userId"
+)
+SELECT "userId", last_any_session
+FROM combined
+WHERE last_any_session BETWEEN NOW() - INTERVAL '60 days'
+                           AND NOW() - INTERVAL '30 days';</pre></div>
+        </div>
+      </div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-amber">C6b</span>
+          <div><div class="card-title">Churned — fully lapsed <span class="count-pill">17,283 users</span></div>
+          <div class="card-def">Last paid session (group or 1:1) was 60+ days ago</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: win-back with a compelling hook</span><span class="goal-pill lo">Revenue potential: low hit rate, near-zero cost to try</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">What doesn't work</div><div class="dbox-content">"We miss you" messages don't work. Generic re-engagement has been tried. Needs a specific external hook.</div></div>
+            <div class="dbox"><div class="dbox-label">Prioritization</div><div class="dbox-content">Focus on users who paid 3+ times before churning. Winback rate typically 5–15%. Budget effort accordingly.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">Specific hook — new practitioner, new topic, seasonal moment</div><div class="init-desc">"We've launched something new — thought of you." Hook must be real and specific, not manufactured.</div></div>
+          <div class="initiative"><div class="init-title">Free re-entry, then re-convert</div><div class="init-desc">Bring them back as a free user first, rebuild the habit, then re-convert. Don't ask for payment on the first win-back message.</div></div>
+          <div class="initiative"><div class="init-title">Personal outreach for high-value churned users</div><div class="init-desc">Users who paid 3+ times worth a personal WhatsApp from the practitioner. High effort, best shot at winning back.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C6b: Last paid session (group or 1:1) 60+ days ago
+WITH group_payments AS (
+  SELECT cu."userId", MAX(ci."startDate") AS last_group
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE c.price > 0 AND cu.status = 'ACTIVE'
+  GROUP BY cu."userId"
+),
+one_on_one AS (
+  SELECT "userId", MAX("sessionDate") AS last_1on1
+  FROM "LeaderUserQuery"
+  WHERE status = 'ACTIVE'
+  GROUP BY "userId"
+),
+combined AS (
+  SELECT COALESCE(gp."userId", o."userId") AS "userId",
+         GREATEST(
+           COALESCE(gp.last_group, '1970-01-01'),
+           COALESCE(o.last_1on1,   '1970-01-01')
+         ) AS last_any_session
+  FROM group_payments gp
+  FULL OUTER JOIN one_on_one o ON gp."userId" = o."userId"
+)
+SELECT "userId", last_any_session
+FROM combined
+WHERE last_any_session &lt;= NOW() - INTERVAL '60 days';</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 7 -->
+    <div class="stage-block">
+      <div class="stage-label">Stage 7 — Paid no-shows</div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-teal">C7</span>
+          <div><div class="card-title">Paid group — never attended <span class="count-pill">4,651 users</span></div>
+          <div class="card-def">Has paid group session record but userHasJoined = false on all paid sessions</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: first actual attendance on a paid session</span><span class="goal-pill hi">Revenue potential: very high — already paid, just never showed</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Who they are</div><div class="dbox-content">Cleared the highest barrier — payment — but never experienced the product. High intent, zero habit. Completely different message to any other cohort.</div></div>
+            <div class="dbox"><div class="dbox-label">Urgency</div><div class="dbox-content">Act quickly — within 7 days of the missed session. Every day without attendance erodes the value they perceive from their purchase.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">"You missed something" message</div><div class="init-desc">Not guilt — just information. "You were registered for [session] — here's the next one you can join." Give them a clear next step.</div></div>
+          <div class="initiative"><div class="init-title">Practitioner personal outreach</div><div class="init-desc">"I noticed you couldn't make it — I'd love to have you in the next session." They paid for something — the practitioner reaching out makes the investment feel worthwhile.</div></div>
+          <div class="initiative"><div class="init-title">Rebook directly</div><div class="init-desc">Send a direct booking link for the next available session from the same practitioner. Remove every friction point between intent and attendance.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C7: Paid for group session but never attended
+SELECT DISTINCT cu."userId"
+FROM "CourseUsers" cu
+JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+JOIN "Course" c ON c.id = ci."courseId"
+WHERE cu.status = 'ACTIVE'
+  AND c.price > 0
+  AND NOT EXISTS (
+    SELECT 1 FROM "CourseUsers" cu2
+    JOIN "CourseInstance" ci2 ON cu2."courseInstanceId" = ci2.id
+    JOIN "Course" c2 ON c2.id = ci2."courseId"
+    WHERE cu2."userId" = cu."userId"
+      AND cu2.status = 'ACTIVE'
+      AND c2.price > 0
+      AND cu2."userHasJoined" = true
+  );</pre></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 8 -->
+    <div class="stage-block">
+      <div class="stage-label">Stage 8 — Offline users</div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-purple">C8</span>
+          <div><div class="card-title">Offline only — never paid online <span class="count-pill">1,005 users</span></div>
+          <div class="card-def">Attended offline sessions, no paid online group session, no 1:1 payment</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: first paid online session or 1:1</span><span class="goal-pill med">Revenue potential: medium — different habit to break</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Core barrier</div><div class="dbox-content">Offline users associate the experience with physical space. Online feels like a downgrade unless you reframe what they're gaining.</div></div>
+            <div class="dbox"><div class="dbox-label">Framing shift</div><div class="dbox-content">Don't say "join us online." Say "keep going between sessions." Online becomes a complement, not a replacement.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">In-room announcement at offline session</div><div class="init-desc">"For those who want to continue between our in-person meetups, we also run online sessions — same energy, flexible timing."</div></div>
+          <div class="initiative"><div class="init-title">"Between sessions" positioning</div><div class="init-desc">"The next in-person is in 3 weeks — there's an online session this Thursday to keep the practice going."</div></div>
+          <div class="initiative"><div class="init-title">Same practitioner bridge — always</div><div class="init-desc">First online session must be with the same practitioner they met in person. Trust transfers. A new face makes it feel like a different platform.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C8: Offline only, never paid online (group or 1:1)
+SELECT DISTINCT cu."userId"
+FROM "CourseUsers" cu
+JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+JOIN "Course" c ON c.id = ci."courseId"
+WHERE cu.status = 'ACTIVE'
+  AND c."type" = 'OFFLINE'
+  AND NOT EXISTS (
+    SELECT 1 FROM "CourseUsers" cu2
+    JOIN "CourseInstance" ci2 ON cu2."courseInstanceId" = ci2.id
+    JOIN "Course" c2 ON c2.id = ci2."courseId"
+    WHERE cu2."userId" = cu."userId"
+      AND cu2.status = 'ACTIVE'
+      AND c2."type" != 'OFFLINE'
+      AND c2.price > 0
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM "LeaderUserQuery" luq
+    WHERE luq."userId" = cu."userId"
+      AND luq.status = 'ACTIVE'
+  );</pre></div>
+        </div>
+      </div>
+
+      <div class="cohort-card" onclick="toggle(this)">
+        <span class="chevron">▼</span>
+        <div class="card-header"><span class="badge badge-purple">C8b</span>
+          <div><div class="card-title">Offline + paid online hybrid <span class="count-pill">1,274 users</span></div>
+          <div class="card-def">Attended offline + has paid online group session or 1:1. Most engaged multi-format users.</div></div>
+        </div>
+        <div class="card-detail">
+          <div class="goal-row"><span class="goal-pill">Goal: maximize frequency and referrals</span><span class="goal-pill hi">Revenue potential: very high — highest multi-format LTV</span></div>
+          <div class="two-col">
+            <div class="dbox"><div class="dbox-label">Who they are</div><div class="dbox-content">Power users. Committed to both formats — strongest identity as SoulSensei regulars.</div></div>
+            <div class="dbox"><div class="dbox-label">Approach</div><div class="dbox-content">Give them status, early access, and a role. Best referral source in the offline track.</div></div>
+          </div>
+          <div class="section-label">Initiatives</div>
+          <div class="initiative"><div class="init-title">VIP early access</div><div class="init-desc">First to hear about new practitioners, special sessions, exclusive formats. Priority access — no price benefit needed.</div></div>
+          <div class="initiative"><div class="init-title">Give them a role</div><div class="init-desc">Feature their story, invite to share in community group, ask them to bring a friend offline. Makes them a stakeholder, not just a customer.</div></div>
+          <div class="initiative"><div class="init-title">Referral mechanic</div><div class="init-desc">"Bring a friend to the next offline session." No discounting — sharing something they love, not a transactional exchange.</div></div>
+          <div class="query-toggle" onclick="toggleQuery(event,this)">&#128196; Show SQL query</div>
+          <div class="query-block"><button class="copy-btn" onclick="copyQuery(event,this)">Copy</button><pre>-- C8b: Offline + paid online (group or 1:1) hybrid
+WITH has_offline AS (
+  SELECT DISTINCT cu."userId"
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE cu.status = 'ACTIVE' AND c."type" = 'OFFLINE'
+),
+has_paid_online AS (
+  SELECT DISTINCT cu."userId"
+  FROM "CourseUsers" cu
+  JOIN "CourseInstance" ci ON cu."courseInstanceId" = ci.id
+  JOIN "Course" c ON c.id = ci."courseId"
+  WHERE cu.status = 'ACTIVE'
+    AND c."type" != 'OFFLINE' AND c.price > 0
+  UNION
+  SELECT DISTINCT "userId"
+  FROM "LeaderUserQuery" WHERE status = 'ACTIVE'
+)
+SELECT ho."userId"
+FROM has_offline ho
+WHERE ho."userId" IN (SELECT "userId" FROM has_paid_online);</pre></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end tab-cohorts -->
+
+  <!-- ═══════ CHART TAB ═══════ -->
+  <div class="tab-panel" id="tab-chart">
+    <p style="font-size:13px;color:var(--text3);margin-bottom:20px;">Each bar shows that cohort's size as a percentage of your total user base of <strong style="color:var(--text)">54,036 users</strong>. Cohorts overlap — a user can appear in multiple cohorts.</p>
+
+    <div class="chart-wrap">
+      <div class="chart-group-label">Stage 1 — Dormant</div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#D3D1C7;color:#444441;">C1</span><div><div class="chart-name">Signed up — done nothing</div><div class="chart-def">No free registration, no group or 1:1 payment</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:17.2%;background:#D3D1C7;"></div><span class="chart-stat" style="color:#5F5E5A;">9,287 &nbsp;·&nbsp; 17.2%</span></div>
+      </div>
+
+      <div class="chart-group-label">Stage 2 — Free users (never paid)</div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#B5D4F4;color:#0C447C;">C2</span><div><div class="chart-name">Registered free — never attended, never paid</div><div class="chart-def">Enrolled in free sessions but userHasJoined = false, no payment</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:20.7%;background:#B5D4F4;"></div><span class="chart-stat" style="color:#185FA5;">11,164 &nbsp;·&nbsp; 20.7%</span></div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#378ADD;color:#ffffff;">C2b</span><div><div class="chart-name">Attended free — truly never paid</div><div class="chart-def">userHasJoined = true, no group or 1:1 payment</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:20.9%;background:#378ADD;"></div><span class="chart-stat" style="color:#185FA5;">11,298 &nbsp;·&nbsp; 20.9%</span></div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#85B7EB;color:#0C447C;">C2c</span><div><div class="chart-name">Attended once, dropped off — never paid</div><div class="chart-def">1 attended free session, silent 14+ days, no payment</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:15.2%;background:#85B7EB;"></div><span class="chart-stat" style="color:#185FA5;">8,224 &nbsp;·&nbsp; 15.2%</span></div>
+      </div>
+
+      <div class="chart-group-label">Stage 3 — Paid group only</div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#9FE1CB;color:#085041;">C3</span><div><div class="chart-name">Paid group once — never returned</div><div class="chart-def">1 group payment, 14+ days ago, no 1:1</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:21.4%;background:#9FE1CB;"></div><span class="chart-stat" style="color:#0F6E56;">11,578 &nbsp;·&nbsp; 21.4%</span></div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#5DCAA5;color:#085041;">C3b</span><div><div class="chart-name">Repeat paid group — active, no 1:1</div><div class="chart-def">2+ group payments, within 60 days, no 1:1</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:4.0%;background:#5DCAA5;"></div><span class="chart-stat" style="color:#0F6E56;">2,150 &nbsp;·&nbsp; 4.0%</span></div>
+      </div>
+
+      <div class="chart-group-label">Stage 4 — Paid 1:1 only</div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#F5C4B3;color:#712B13;">C4</span><div><div class="chart-name">Paid 1:1 once — never returned</div><div class="chart-def">1 completed 1:1, 14+ days ago, no group payment</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:1.6%;background:#F5C4B3;min-width:4px;"></div><span class="chart-stat" style="color:#712B13;">875 &nbsp;·&nbsp; 1.6%</span></div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#D85A30;color:#ffffff;">C4b</span><div><div class="chart-name">Repeat 1:1 — active, no group</div><div class="chart-def">2+ completed 1:1 sessions, within 60 days, no group</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:0.2%;background:#D85A30;min-width:4px;"></div><span class="chart-stat" style="color:#712B13;">101 &nbsp;·&nbsp; 0.2%</span></div>
+      </div>
+
+      <div class="chart-group-label">Stage 5 — Paid both formats (active)</div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#C0DD97;color:#27500A;">C5</span><div><div class="chart-name">Paid both group + 1:1 — active</div><div class="chart-def">Has both payment types, last session within 60 days</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:0.7%;background:#C0DD97;min-width:4px;"></div><span class="chart-stat" style="color:#27500A;">404 &nbsp;·&nbsp; 0.7%</span></div>
+      </div>
+
+      <div class="chart-group-label">Stage 6 — Lapsing / churned (any payment type)</div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#FAC775;color:#633806;">C6</span><div><div class="chart-name">Going cold — at risk</div><div class="chart-def">Last paid session (group or 1:1) 30–60 days ago</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:3.8%;background:#FAC775;"></div><span class="chart-stat" style="color:#854F0B;">2,046 &nbsp;·&nbsp; 3.8%</span></div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#EF9F27;color:#633806;">C6b</span><div><div class="chart-name">Churned — fully lapsed</div><div class="chart-def">Last paid session (group or 1:1) 60+ days ago</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:32.0%;background:#EF9F27;"></div><span class="chart-stat" style="color:#854F0B;">17,283 &nbsp;·&nbsp; 32.0%</span></div>
+      </div>
+
+      <div class="chart-group-label">Stage 7 — Paid no-shows</div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#9FE1CB;color:#085041;">C7</span><div><div class="chart-name">Paid group — never attended</div><div class="chart-def">Has paid group record but userHasJoined = false on all</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:8.6%;background:#9FE1CB;"></div><span class="chart-stat" style="color:#0F6E56;">4,651 &nbsp;·&nbsp; 8.6%</span></div>
+      </div>
+
+      <div class="chart-group-label">Stage 8 — Offline users</div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#CECBF6;color:#3C3489;">C8</span><div><div class="chart-name">Offline only — never paid online</div><div class="chart-def">Attended offline, no paid online group or 1:1</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:1.9%;background:#CECBF6;min-width:4px;"></div><span class="chart-stat" style="color:#534AB7;">1,005 &nbsp;·&nbsp; 1.9%</span></div>
+      </div>
+      <div class="chart-row">
+        <div class="chart-meta"><span class="chart-badge" style="background:#AFA9EC;color:#3C3489;">C8b</span><div><div class="chart-name">Offline + paid online hybrid</div><div class="chart-def">Attended offline + paid online group or 1:1</div></div></div>
+        <div class="chart-bar-wrap"><div class="chart-bar" style="width:2.4%;background:#AFA9EC;min-width:4px;"></div><span class="chart-stat" style="color:#534AB7;">1,274 &nbsp;·&nbsp; 2.4%</span></div>
+      </div>
+    </div>
+
+    <div class="chart-axis"><span>0%</span><span>10%</span><span>20%</span><span>30%</span><span>40%</span><span>50%</span><span>60%</span><span>70%</span><span>80%</span><span>90%</span><span>100%</span></div>
+
+    <div class="callout-row">
+      <div class="callout" style="background:#FAECE7;border-color:#F5C4B3;">
+        <div class="callout-title" style="color:#712B13;">Biggest revenue opportunity</div>
+        <div class="callout-val" style="color:#993C1D;">C2b + C6b = 52.9%</div>
+        <div class="callout-desc">Proven free attendees who never paid + all churned paid users. Largest absolute upside.</div>
+      </div>
+      <div class="callout" style="background:#EAF3DE;border-color:#C0DD97;">
+        <div class="callout-title" style="color:#27500A;">Best upsell target</div>
+        <div class="callout-val" style="color:#3B6D11;">C3b = 4.0%</div>
+        <div class="callout-desc">Repeat active group users with no 1:1. Highest conversion likelihood for personal sessions.</div>
+      </div>
+      <div class="callout" style="background:#E6F1FB;border-color:#B5D4F4;">
+        <div class="callout-title" style="color:#0C447C;">Protect at all costs</div>
+        <div class="callout-val" style="color:#185FA5;">C5 + C4b = 0.9%</div>
+        <div class="callout-desc">Users active across both formats. Small cohort, disproportionate revenue — losing one is very costly.</div>
+      </div>
+    </div>
+  </div><!-- end tab-chart -->
+
+</div><!-- end page -->
+<script>
+function switchTab(name) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    if (b.getAttribute('onclick') === "switchTab('" + name + "')") b.classList.add('active');
+  });
+}
+function toggle(card) {
+  const detail = card.querySelector('.card-detail');
+  const chevron = card.querySelector('.chevron');
+  const isOpen = detail.classList.contains('open');
+  detail.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+  card.classList.toggle('active', !isOpen);
+}
+function toggleQuery(e, btn) {
+  e.stopPropagation();
+  const block = btn.nextElementSibling;
+  const isOpen = block.classList.contains('open');
+  block.classList.toggle('open', !isOpen);
+  btn.textContent = isOpen ? '\u{1F4C4} Show SQL query' : '\u{1F4C4} Hide SQL query';
+}
+function copyQuery(e, btn) {
+  e.stopPropagation();
+  const pre = btn.nextElementSibling;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>
